@@ -1,9 +1,15 @@
+
 import sqlite3
 import requests
 import logging
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_PATH = os.getenv("DB_PATH", "pools.db")
 
 def register_email(email):
-    with sqlite3.connect("pools.db") as conn:
+    with sqlite3.connect(DB_PATH) as conn:
         cursor = conn.cursor()
         cursor.execute("CREATE TABLE IF NOT EXISTS alerts (email TEXT PRIMARY KEY)")
         cursor.execute("INSERT OR IGNORE INTO alerts VALUES (?)", (email,))
@@ -11,7 +17,7 @@ def register_email(email):
 
 def check_apy_changes():
     try:
-        with sqlite3.connect("pools.db") as conn:
+        with sqlite3.connect(DB_PATH) as conn:
             cursor = conn.cursor()
             cursor.execute("SELECT id, apy FROM pools")
             current_pools = {row[0]: row[1] for row in cursor.fetchall()}
@@ -31,7 +37,7 @@ def check_apy_changes():
         return []
 
 def get_all_pools():
-    conn = sqlite3.connect("pools.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM pools")
     data = cursor.fetchall()
